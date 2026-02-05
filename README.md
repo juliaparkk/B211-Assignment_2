@@ -1,56 +1,81 @@
 # B211-Assignment_2
 
-# Purpose
-This project analyzes NBA player season statistics from a TSV dataset to compute common performance metrics (shooting accuracies, points rates, and defensive rates). It produces top‑100 lists per metric and saves them to a text file for easy review.
+## Purpose
+This project analyzes NBA player season statistics using NumPy to compute shooting accuracy and per‑game/per‑minute performance metrics. It then outputs top‑100 lists for each metric to a text file for easy review.
 
-# Data Source
-Input file: NBA_Player_Stats.tsv
-The dataset is a subset of a larger Kaggle repository (as provided for the assignment).
-Class Design and Implementation
-The program uses a single data model class, PlayerSeasonStats, to encapsulate one player’s statistics for a single season. This keeps the calculation logic close to the data and makes it easy to compute multiple metrics consistently.
+## Data
+Input file: NBA_Player_Stats.tsv (tab‑separated values)
 
-# Class: PlayerSeasonStats
-Represents one row of player-season statistics from the TSV file.
+Each row represents one player season and includes fields such as games played, minutes, field goals, three‑pointers, free throws, points, blocks, and steals.
 
-# Attributes
-player: Player name.
-season: Season identifier (e.g., 2019–2020).
-team: Team abbreviation.
-gp: Games played.
-min: Total minutes played.
-fgm: Field goals made.
-fga: Field goals attempted.
-pm3: Three‑pointers made.
-pa3: Three‑pointers attempted.
-ftm: Free throws made.
-fta: Free throws attempted.
-blk: Total blocks.
-stl: Total steals.
-pts: Total points.
-All numeric attributes are stored as float to support division in metrics.
+## Design Overview
+The solution is centered around one NumPy‑driven class plus small helper functions:
 
-# Methods
-fg_accuracy(): Field goal accuracy = fgm / fga (0 if fga is 0).
-three_pt_accuracy(): Three‑point accuracy = pm3 / pa3 (0 if pa3 is 0).
-ft_accuracy(): Free‑throw accuracy = ftm / fta (0 if fta is 0).
-points_per_minute(): Points per minute = pts / min (0 if min is 0).
-points_per_game(): Points per game = pts / gp (0 if gp is 0).
-overall_accuracy(): Overall shooting accuracy = (fgm + ftm) / (fga + fta) (0 if attempts are 0).
-blocks_per_game(): Blocks per game = blk / gp (0 if gp is 0).
-steals_per_game(): Steals per game = stl / gp (0 if gp is 0).
+### Class: PlayerSeasonMetrics
+**Purpose:**
+Stores the full dataset in NumPy arrays and provides vectorized methods to compute all required metrics.
 
-# Processing Flow
-Load the TSV file with csv.DictReader.
-Build a list of PlayerSeasonStats objects.
-Sort by each metric and extract the top 100.
-Print results and write all top‑100 lists to Top_100_Lists.txt.
-Output
+**Attributes:**
+- player: NumPy array of player names (string)
+- season: NumPy array of seasons (string)
+- team: NumPy array of team abbreviations (string)
+- gp: games played (float)
+- min: minutes played (float)
+- fgm, fga: field goals made/attempted (float)
+- pm3, pa3: three‑pointers made/attempted (float)
+- ftm, fta: free throws made/attempted (float)
+- blk: blocks (float)
+- stl: steals (float)
+- pts: points (float)
 
-Console output for each top‑100 list.
-File output: Top_100_Lists.txt in the same folder as the script.
-Limitations and Assumptions
+**Methods:**
+- safe_divide(numerator, denominator)
+  - Vectorized divide that returns 0 where the denominator is 0.
+- fg_accuracy()
+  - Field goal accuracy: FGM / FGA.
+- three_pt_accuracy()
+  - Three‑point accuracy: 3PM / 3PA.
+- ft_accuracy()
+  - Free throw accuracy: FTM / FTA.
+- points_per_minute()
+  - Average points per minute: PTS / MIN.
+- points_per_game()
+  - Average points per game: PTS / GP.
+- overall_accuracy()
+  - Overall shooting accuracy: (FGM + FTM) / (FGA + FTA).
+- blocks_per_game()
+  - Average blocks per game: BLK / GP.
+- steals_per_game()
+  - Average steals per game: STL / GP.
+- top_n(values, n=100)
+  - Returns the indices of the top N values.
+- format_top(title, values, n=100)
+  - Formats the top N list for file output.
+- print_top(title, values, n=100)
+  - Prints the top N list to the console.
 
-The script expects the input file NBA_Player_Stats.tsv to exist in the same folder as Assignment 2 Numpy.py.
-No data cleaning is performed beyond safe division checks. If the dataset contains unexpected text or missing columns, the script may fail.
-overall_accuracy() uses total field‑goal and free‑throw attempts; three‑pointers are already included in field‑goal attempts, so they are not counted twice.
-The output lists are based on raw season totals and do not include minimum‑games or minimum‑attempts filters. This can favor small‑sample seasons with unusually high percentages.
+### Helper Functions
+- load_data(path)
+  - Uses NumPy’s genfromtxt to load the TSV into a structured array.
+- main()
+  - Orchestrates loading data, computing metrics, printing results, and writing the top‑100 lists to Top_100_Lists.txt.
+
+## Output
+Top‑100 lists are printed to the console and written to:
+- Top_100_Lists.txt
+
+Metrics included:
+- Field goal accuracy
+- Three‑point accuracy
+- Free throw accuracy
+- Points per minute
+- Points per game
+- Overall shooting accuracy
+- Blocks per game
+- Steals per game
+
+## Limitations
+- Rows with zero attempts/minutes/games return 0 for that metric (to avoid division errors).
+- The input file must match the expected column names.
+- Ties are kept in NumPy’s default sort order (stable ordering is not enforced).
+
